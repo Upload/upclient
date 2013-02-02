@@ -33,11 +33,10 @@ if (args._.length > 0) { // Paste read mode
             data_out += chunk;
         });
         res.on('end', function() {
-            data_out = JSON.parse(data_out);
+            data_out = JSON.parse(data_out)['data'];
             if (password) {
                 data_out = sjcl.decrypt(password, data_out['data']);
             }
-            //console.log(data_out);
             process.stdout.write(data_out);
         });
     });
