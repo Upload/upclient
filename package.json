@@ -1,0 +1,13 @@
+{
+ "name": "3d3client",
+ "version": "0.0.1",
+ "description": "Command-line client to the 3d3 pastebin",
+ "main": "3d3client.js",
+ "preferGlobal": "true",
+ "bin": {"3d3": "3d3client.js"},
+ "author": "Keith Morrow",
+ "dependencies": {
+  "optimist": "*"
+ },
+ "engines": {"node": "*"}
+}
