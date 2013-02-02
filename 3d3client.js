@@ -35,7 +35,7 @@ if (args._.length > 0) { // Paste read mode
         res.on('end', function() {
             data_out = JSON.parse(data_out)['data'];
             if (password) {
-                data_out = sjcl.decrypt(password, data_out['data']);
+                data_out = sjcl.decrypt(password, data_out);
             }
             process.stdout.write(data_out);
         });
