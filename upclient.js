@@ -4,7 +4,10 @@ var sjcl = require('./sjcl.js');
 var https = require('https');
 var crypto = require('crypto');
 var FormData = require('form-data');
-var args = require('optimist').argv;
+var argv = require('minimist')(process.argv.slice(2));
+var mmm = require('mmmagic');
+var mime = require('mime');
+var fs = require('fs');
 
 function parametersfrombits(seed) {
     var out = sjcl.hash.sha512.hash(seed)
@@ -88,91 +91,74 @@ function str2ab(str) {
 	for (var i = 0, strLen = str.length; i < strLen; i++) {
 		buf.writeUInt16BE(str.charCodeAt(i), i*2);
 	}
-/*
-	var buf = new ArrayBuffer(str.length * 2);
-	var bufView = new DataView(buf);
-	for (var i = 0, strLen = str.length; i < strLen; i++) {
-		bufView.setUint16(i * 2, str.charCodeAt(i), false)
-	}
-*/
 	return buf;
 }
 
-
-eMap = {
-    ruby: 'rb', python: 'py', perl: 'pl', php: 'php', scala: 'scala', go: 'go',
-    xml: 'xml', html: 'xml', htm: 'xml', css: 'css', javascript: 'js', vbscript: 'vbs',
-    lua: 'lua', delphi: 'pas', pascal: 'pas', java: 'java', cpp: 'cpp', cc: 'cpp',
-    objectivec: 'm', vala: 'vala', cs: 'cs', csharp: 'cs', sql: 'sql', smalltalk: 'sm',
-    lisp: 'lisp', ini: 'ini', diff: 'diff', bash: 'bash', sh: 'bash', tex: 'tex',
-    erlang: 'erl', haskell: 'hs', markdown: 'md', txt: 'txt', coffee: 'coffee',
-    coffeescript: 'coffee', json: 'json', c: 'cpp', py: 'py', pl: 'pl'
-}
-
-{
-    var stdin = process.openStdin();
-    var data = '';
-    var rndbuf = crypto.prng(1024);
-    for (var i = 0; i < 256; i++) {
-        sjcl.random.addEntropy(rndbuf.readInt32LE(i*4), 32, "prng");
-    }
-
-    stdin.on('data', function(chunk) {
-        data += chunk;
-    });
-    stdin.on('end', function() {
-	
-        var seed = new Uint8Array(16);
+function doUpload(data, name, type) {
+	var seed = new Uint8Array(16);
 	seed.set(crypto.randomBytes(seed.length));
 
-	
 
-        var header = JSON.stringify({
-            'mime': "text/plain",
-            'name': "Pasted.txt"
-        })
 
-        var zero = new Buffer([0,0]);
+	var header = JSON.stringify({
+	    'mime': type,
+	    'name': name
+	})
+
+	var zero = new Buffer([0,0]);
 	zero[0] = 0;
 	zero[1] = 0;
 
-        var blob = Buffer.concat([str2ab(header), zero, Buffer(data)])
+	var blob = Buffer.concat([str2ab(header), zero, Buffer(data)])
 
-        result = encrypt(blob, seed, 0);
+	result = encrypt(blob, seed, 0);
 
 
-        var formdata = new FormData()
-        formdata.append('privkey', 'c61540b5ceecd05092799f936e27755f')
-        formdata.append('ident', result.ident)
-        formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
+	var formdata = new FormData()
+	formdata.append('privkey', 'c61540b5ceecd05092799f936e27755f')
+	formdata.append('ident', result.ident)
+	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
-        var req = https.request({
-            host: 'e.3d3.ca',
-            port: 443,
-            path: '/up',
-            method: 'POST',
-            headers: formdata.getHeaders()
-        });
+	var req = https.request({
+	    host: 'e.3d3.ca',
+	    port: 443,
+	    path: '/up',
+	    method: 'POST',
+	    headers: formdata.getHeaders()
+	});
 
 
 	formdata.pipe(req);
 
-        req.on('error', function(err) {
-        });
-        
-        req.on('response', function(res) {
-            res.setEncoding('utf8');
-            var data_out = '';
-            res.on('data', function(chunk) {
-                data_out += chunk;
-            });
-            res.on('end', function() {
-                var res_url = "https://e.3d3.ca/#"+result.seed;
-                console.log(res_url);
-            });
-        });
+	req.on('error', function(err) {
+	});
 
-        req.write(data);
-        req.end();
-    });
+	req.on('response', function(res) {
+	    res.setEncoding('utf8');
+	    var data_out = '';
+	    res.on('data', function(chunk) {
+		data_out += chunk;
+	    });
+	    res.on('end', function() {
+		var res_url = "https://e.3d3.ca/#"+result.seed;
+		console.log(res_url);
+	    });
+	});
+
+	req.write(data);
+	req.end();
 }
+
+
+var rndbuf = crypto.prng(1024);
+for (var i = 0; i < 256; i++) {
+    sjcl.random.addEntropy(rndbuf.readInt32LE(i*4), 32, "prng");
+}
+
+var buffer = fs.readFileSync('/dev/stdin');
+var magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
+
+magic.detect(buffer, function (err, result) {
+    var ext = mime.extension(result);
+    doUpload(buffer, "Pasted." + ext, result);
+});

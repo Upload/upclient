@@ -7,8 +7,10 @@
  "bin": {"up": "upclient.js"},
  "author": "Keith Morrow",
  "dependencies": {
-  "optimist": "*",
-  "form-data": "*"
+  "minimist": "*",
+  "form-data": "*",
+  "mmmagic": "*",
+  "mime": "*"
  },
  "engines": {"node": "*"}
 }
