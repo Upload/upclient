@@ -25,6 +25,10 @@ Take a screenshot (using a selection rectangle), send it to Upload, and put the 
 
     import png:- | up | xsel -b
 
+Do the same as above, but also notify when complete:
+
+    import png:- | up | tee >(xsel -b) >(xargs notify-send "Upload Complete")
+
 ### Upload
 
 For more information on Upload, view the readme at https://github.com/Upload/Upload
