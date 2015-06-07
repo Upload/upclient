@@ -1,5 +1,5 @@
-#!/usr/bin/env nodejs
-
+#!/usr/bin/env node
+"use strict";
 var sjcl = require('./sjcl.js');
 var https = require('https');
 var crypto = require('crypto');
@@ -108,7 +108,6 @@ function str2ab(str) {
 }
 
 function doUpload(data, name, type) {
-	console.log(type)
 	var seed = new Uint8Array(16);
 	seed.set(crypto.randomBytes(seed.length));
 
