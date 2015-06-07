@@ -4,10 +4,23 @@ var sjcl = require('./sjcl.js');
 var https = require('https');
 var crypto = require('crypto');
 var FormData = require('form-data');
-var argv = require('minimist')(process.argv.slice(2));
 var mmm = require('mmmagic');
 var mime = require('mime');
 var fs = require('fs');
+var cli = require('snack-cli');
+var path = require('path');
+var S = require('string');
+S.extendPrototype();
+
+var argv = cli
+	.name('up')
+	.version('0.1')
+	.usage('[options] [files]')
+	.description('Upload files and text to an Upload based pastebin. If no argument is specified, stdin is assumed.')
+	.option('-b, --binary', 'force application/octet-stream', false)
+	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
+	.option('-m, --mime <mime>', 'force given mime type', 'detect')
+	.parse();
 
 function parametersfrombits(seed) {
     var out = sjcl.hash.sha512.hash(seed)
@@ -98,20 +111,15 @@ function doUpload(data, name, type) {
 	var seed = new Uint8Array(16);
 	seed.set(crypto.randomBytes(seed.length));
 
-
-
 	var header = JSON.stringify({
 	    'mime': type,
 	    'name': name
 	})
 
 	var zero = new Buffer([0,0]);
-	zero[0] = 0;
-	zero[1] = 0;
-
 	var blob = Buffer.concat([str2ab(header), zero, Buffer(data)])
 
-	result = encrypt(blob, seed, 0);
+	var result = encrypt(blob, seed, 0);
 
 
 	var formdata = new FormData()
@@ -145,20 +153,37 @@ function doUpload(data, name, type) {
 	    });
 	});
 
-	req.write(data);
 	req.end();
 }
 
+function validateMimeType(type) {
+	if (argv.binary)
+		return "application/octet-stream";
+	if (argv.mime != "detect")
+		return argv.mime;
+	if (type.startsWith("audio") || type.startsWith("video") || type.startsWith("text") || type.startsWith("image"))
+		return type;
+	return "text/plain";
+}
 
 var rndbuf = crypto.prng(1024);
 for (var i = 0; i < 256; i++) {
     sjcl.random.addEntropy(rndbuf.readInt32LE(i*4), 32, "prng");
 }
 
-var buffer = fs.readFileSync('/dev/stdin');
-var magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
+if (argv.args.length > 0) {
+	argv.args.forEach(function (val, idx, arr) {
+		var mimeType = validateMimeType(mime.lookup(val));
+		var buffer = fs.readFileSync(val);
+		doUpload(buffer, path.basename(val), mimeType);
+	});
+} else {
+	var buffer = fs.readFileSync('/dev/stdin');
+	var magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 
-magic.detect(buffer, function (err, result) {
-    var ext = mime.extension(result);
-    doUpload(buffer, "Pasted." + ext, result);
-});
+	magic.detect(buffer, function (err, result) {
+		var mimeType = validateMimeType(result);
+		var ext = mime.extension(result);
+		doUpload(buffer, argv.file ? argv.file : "Pasted." + ext, mimeType);
+	});
+}
