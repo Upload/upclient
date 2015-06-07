@@ -108,6 +108,7 @@ function str2ab(str) {
 }
 
 function doUpload(data, name, type) {
+	console.log(type)
 	var seed = new Uint8Array(16);
 	seed.set(crypto.randomBytes(seed.length));
 
@@ -156,14 +157,23 @@ function doUpload(data, name, type) {
 	req.end();
 }
 
-function validateMimeType(type) {
+function validateMimeType(type, buf, cb) {
+	var guess = null;
 	if (argv.binary)
-		return "application/octet-stream";
+		guess = "application/octet-stream";
 	if (argv.mime != "detect")
-		return argv.mime;
+		guess = argv.mime;
 	if (type.startsWith("audio") || type.startsWith("video") || type.startsWith("text") || type.startsWith("image"))
-		return type;
-	return "text/plain";
+		guess = type;
+
+	if (guess != null) {
+		cb(guess);
+		return;
+	}
+	var magic = new mmm.Magic(mmm.MAGIC_MIME_ENCODING);
+	magic.detect(buf, function(err, result) {
+		cb(result == "binary" ? "application/octet-stream" : "text/plain");
+	});
 }
 
 var rndbuf = crypto.prng(1024);
@@ -173,17 +183,20 @@ for (var i = 0; i < 256; i++) {
 
 if (argv.args.length > 0) {
 	argv.args.forEach(function (val, idx, arr) {
-		var mimeType = validateMimeType(mime.lookup(val));
 		var buffer = fs.readFileSync(val);
-		doUpload(buffer, path.basename(val), mimeType);
+		validateMimeType(mime.lookup(val), buffer, function(mimeType) {
+			doUpload(buffer, path.basename(val), mimeType);
+		});
 	});
 } else {
 	var buffer = fs.readFileSync('/dev/stdin');
 	var magic = new mmm.Magic(mmm.MAGIC_MIME_TYPE);
 
 	magic.detect(buffer, function (err, result) {
-		var mimeType = validateMimeType(result);
-		var ext = mime.extension(result);
-		doUpload(buffer, argv.file ? argv.file : "Pasted." + ext, mimeType);
+		validateMimeType(result, buffer, function(mimeType) {
+			var ext = mime.extension(result);
+			doUpload(buffer, argv.file ? argv.file : "Pasted." + ext, mimeType);
+		});
+		
 	});
 }
