@@ -16,7 +16,7 @@ var argv = cli
 	.name('up')
 	.version('0.1')
 	.usage('[options] [files]')
-	.description('Upload files and text to an Upload based pastebin. If no argument is specified, stdin is assumed.')
+	.description('Upload files and text to an Up1 based pastebin. If no argument is specified, stdin is assumed.')
 	.option('-b, --binary', 'force application/octet-stream', false)
 	.option('-t, --text', 'force text/plain', false)
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)

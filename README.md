@@ -1,8 +1,8 @@
-### Up, the Upload command-line client
+### Up, the Up1 command-line client
 
     Usage: up [options] [files]
     
-    Upload files and text to an Upload based pastebin. If no argument is specified, stdin is assumed.
+    Upload files and text to an Up1 based pastebin. If no argument is specified, stdin is assumed.
     
     Options:
       -b, --binary        force application/octet-stream
@@ -13,15 +13,15 @@
     
 ### Usage examples
 
-Paste command output to Upload:
+Paste command output to Up1:
 
     ps aux | up
 
-Copy an image file to Upload:
+Copy an image file to Up1:
 
     up image.png
 
-Take a screenshot (using a selection rectangle), send it to Upload, and put the Upload link on the clipboard:
+Take a screenshot (using a selection rectangle), send it to Up1, and put the result link on the clipboard:
 
     import png:- | up | xsel -b
 
@@ -29,6 +29,6 @@ Do the same as above, but also notify when complete:
 
     import png:- | up | tee >(xsel -b) >(xargs notify-send "Upload Complete")
 
-### Upload
+### Up1
 
-For more information on Upload, view the readme at https://github.com/Upload/Upload
+For more information on Up1, view the readme at https://github.com/Upload/Up1
