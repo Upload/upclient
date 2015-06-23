@@ -123,7 +123,7 @@ function doUpload(data, name, type) {
 
 
 	var formdata = new FormData()
-	formdata.append('privkey', 'c61540b5ceecd05092799f936e27755f')
+	formdata.append('api_key', 'c61540b5ceecd05092799f936e27755f')
 	formdata.append('ident', result.ident)
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
