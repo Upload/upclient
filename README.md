@@ -5,7 +5,8 @@
     Upload files and text to an Up1 based pastebin. If no argument is specified, stdin is assumed.
     
     Options:
-      -b, --binary        force application/octet-stream
+      -b, --binary        force application/octet-stream (for downloadable file)
+      -t, --text          force text/plain (for pastebin)
       -f, --file <name>   force file name for stdin based inputs
       -m, --mime <mime>   force given mime type (default: detect)
           --version       display version information and exit
@@ -31,4 +32,4 @@ Do the same as above, but also notify when complete:
 
 ### Up1
 
-For more information on Up1, view the readme at https://github.com/Upload/Up1
+For more information on Up1, view the README at https://github.com/Upload/Up1
