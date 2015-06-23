@@ -16,8 +16,9 @@ var argv = cli
 	.name('up')
 	.version('0.1')
 	.usage('[options] [files]')
-	.description('Upload files and text to an Upload based pastebin. If no argument is specified, stdin is assumed.')
+	.description('Upload files and text to an Up1 based pastebin. If no argument is specified, stdin is assumed.')
 	.option('-b, --binary', 'force application/octet-stream', false)
+	.option('-t, --text', 'force text/plain', false)
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
 	.parse();
@@ -128,7 +129,7 @@ function doUpload(data, name, type) {
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
 	var req = https.request({
-	    host: 'e.3d3.ca',
+	    host: 'up1.ca',
 	    port: 443,
 	    path: '/up',
 	    method: 'POST',
@@ -148,7 +149,7 @@ function doUpload(data, name, type) {
 		data_out += chunk;
 	    });
 	    res.on('end', function() {
-		var res_url = "https://e.3d3.ca/#"+result.seed;
+		var res_url = "https://up1.ca/#"+result.seed;
 		console.log(res_url);
 	    });
 	});
@@ -160,9 +161,11 @@ function validateMimeType(type, buf, cb) {
 	var guess = null;
 	if (argv.binary)
 		guess = "application/octet-stream";
-	if (argv.mime != "detect")
+  else if (argv.text)
+    guess = "text/plain";
+  else if (argv.mime != "detect")
 		guess = argv.mime;
-	if (type.startsWith("audio") || type.startsWith("video") || type.startsWith("text") || type.startsWith("image"))
+  else if (type.startsWith("audio") || type.startsWith("video") || type.startsWith("text") || type.startsWith("image"))
 		guess = type;
 
 	if (guess != null) {
