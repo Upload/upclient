@@ -11,6 +11,7 @@ var cli = require('snack-cli');
 var path = require('path');
 var S = require('string');
 S.extendPrototype();
+const { URL } = require('url');
 
 var argv = cli
 	.name('up')
@@ -22,6 +23,9 @@ var argv = cli
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
 	.parse();
+
+const uphost = new URL(process.env.UP1_HOST || "https://up1.ca");
+const apikey = process.env.UP1_APIKEY || "c61540b5ceecd05092799f936e27755f";
 
 function parametersfrombits(seed) {
     var out = sjcl.hash.sha512.hash(seed)
@@ -124,13 +128,13 @@ function doUpload(data, name, type) {
 
 
 	var formdata = new FormData()
-	formdata.append('api_key', 'c61540b5ceecd05092799f936e27755f')
+	formdata.append('api_key', apikey)
 	formdata.append('ident', result.ident)
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
 	var req = https.request({
-	    host: 'up1.ca',
-	    port: 443,
+	    host: uphost.hostname,
+	    port: uphost.port,
 	    path: '/up',
 	    method: 'POST',
 	    headers: formdata.getHeaders()
@@ -149,7 +153,7 @@ function doUpload(data, name, type) {
 		data_out += chunk;
 	    });
 	    res.on('end', function() {
-		var res_url = "https://up1.ca/#"+result.seed;
+		var res_url = uphost.origin+"/#"+result.seed;
 		console.log(res_url);
 	    });
 	});
