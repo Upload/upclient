@@ -2,6 +2,7 @@
 "use strict";
 var sjcl = require('./sjcl.js');
 var https = require('https');
+var http = require('http');
 var crypto = require('crypto');
 var FormData = require('form-data');
 var mmm = require('mmmagic');
@@ -132,13 +133,25 @@ function doUpload(data, name, type) {
 	formdata.append('ident', result.ident)
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
-	var req = https.request({
-	    host: uphost.hostname,
-	    port: uphost.port,
-	    path: '/up',
-	    method: 'POST',
-	    headers: formdata.getHeaders()
-	});
+    // There *must* be a more elegant way to write this if-else.
+    // I just wanted to quickly get it to work.
+    if ( uphost.protocol === "https:" ) {
+        var req = https.request({
+            host: uphost.hostname,
+            port: uphost.port,
+            path: '/up',
+            method: 'POST',
+            headers: formdata.getHeaders()
+        });
+    } else if ( uphost.protocol === "http:" ) {
+        var req = http.request({
+            host: uphost.hostname,
+            port: uphost.port,
+            path: '/up',
+            method: 'POST',
+            headers: formdata.getHeaders()
+        });
+    }
 
 
 	formdata.pipe(req);
