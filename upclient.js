@@ -23,10 +23,11 @@ var argv = cli
 	.option('-t, --text', 'force text/plain', false)
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
+	.option('-h, --host <https://example.com:443>', 'specify server host', (process.env.UP1_HOST || "https://up1.ca") )
+	.option('-k, --apikey <key>', 'specify server api key', (process.env.UP1_APIKEY || "c61540b5ceecd05092799f936e27755f") )
 	.parse();
 
-const uphost = new URL(process.env.UP1_HOST || "https://up1.ca");
-const apikey = process.env.UP1_APIKEY || "c61540b5ceecd05092799f936e27755f";
+const uphost = new URL(argv.host);
 
 function parametersfrombits(seed) {
     var out = sjcl.hash.sha512.hash(seed)
@@ -129,7 +130,7 @@ function doUpload(data, name, type) {
 
 
 	var formdata = new FormData()
-	formdata.append('api_key', apikey)
+	formdata.append('api_key', argv.apikey)
 	formdata.append('ident', result.ident)
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
