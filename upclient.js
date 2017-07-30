@@ -23,11 +23,11 @@ var argv = cli
 	.option('-t, --text', 'force text/plain', false)
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
-	.option('-h, --host <https://example.com:443>', 'specify server host', (process.env.UP1_HOST || "https://up1.ca") )
+	.option('-s, --server <https://example.com:443>', 'specify Up1 server', (process.env.UP1_SERVER || "https://up1.ca") )
 	.option('-k, --apikey <key>', 'specify server api key', (process.env.UP1_APIKEY || "c61540b5ceecd05092799f936e27755f") )
 	.parse();
 
-const uphost = new URL(argv.host);
+const uphost = new URL(argv.server);
 
 function parametersfrombits(seed) {
     var out = sjcl.hash.sha512.hash(seed)
