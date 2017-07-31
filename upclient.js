@@ -134,8 +134,6 @@ function doUpload(data, name, type) {
 	formdata.append('ident', result.ident)
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
-    // There *must* be a more elegant way to write this if-else.
-    // I just wanted to quickly get it to work.
     if ( uphost.protocol === "https:" ) {
         var req = https.request({
             host: uphost.hostname,
