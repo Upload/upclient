@@ -141,6 +141,8 @@ function doUpload(data, name, type) {
             path: '/up',
             method: 'POST',
             headers: formdata.getHeaders()
+        }).on('error', (e) => {
+            console.error(e)
         });
     } else if ( uphost.protocol === "http:" ) {
         var req = http.request({
@@ -149,6 +151,8 @@ function doUpload(data, name, type) {
             path: '/up',
             method: 'POST',
             headers: formdata.getHeaders()
+        }).on('error', (e) => {
+            console.error(e)
         });
     }
 
