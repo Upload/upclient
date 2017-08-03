@@ -14,6 +14,9 @@ var S = require('string');
 S.extendPrototype();
 const { URL } = require('url');
 
+const up1_server_default = "https://up1.ca";
+const up1_apikey_default = "c61540b5ceecd05092799f936e27755f";
+
 var argv = cli
 	.name('up')
 	.version('0.1')
@@ -23,8 +26,8 @@ var argv = cli
 	.option('-t, --text', 'force text/plain', false)
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
-	.option('-s, --server <https://example.com:443>', 'specify Up1 server', (process.env.UP1_SERVER || "https://up1.ca") )
-	.option('-k, --apikey <key>', 'specify server api key', (process.env.UP1_APIKEY || "c61540b5ceecd05092799f936e27755f") )
+	.option('-s, --server <https://example.com:443>', 'specify Up1 server', (process.env.UP1_SERVER || up1_server_default) )
+	.option('-k, --apikey <key>', 'specify server api key', (process.env.UP1_APIKEY || up1_apikey_default) )
 	.parse();
 
 const uphost = new URL(argv.server);
