@@ -11,6 +11,7 @@
       -m, --mime <mime>                        force given mime type (default: detect)
       -s, --server <https://example.com:443>   specify Up1 server (default: https://up1.ca)
       -k, --apikey <key>                       specify server api key (default: c61540b5ceecd05092799f936e27755f)
+      -d, --delurl                             print the deletion url
           --version                            display version information and exit
           --help                               display this help and exit
 

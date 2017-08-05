@@ -28,6 +28,7 @@ var argv = cli
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
 	.option('-s, --server <https://example.com:443>', 'specify Up1 server', (process.env.UP1_SERVER || up1_server_default) )
 	.option('-k, --apikey <key>', 'specify server api key', (process.env.UP1_APIKEY || up1_apikey_default) )
+	.option('-d, --delurl', 'print the deletion url', ((process.env.UP1_DELURL == 1) || false) )
 	.parse();
 
 const uphost = new URL(argv.server);
@@ -169,8 +170,11 @@ function doUpload(data, name, type) {
 		data_out += chunk;
 	    });
 	    res.on('end', function() {
-		var res_url = uphost.origin+"/#"+result.seed;
-		console.log(res_url);
+            data_out = JSON.parse(data_out);
+            var res_url = uphost.origin+"/#"+result.seed;
+            var del_url = uphost.origin+"/del?delkey="+data_out.delkey+"&ident="+result.ident;
+            console.log(res_url);
+            argv.delurl && console.log(del_url);
 	    });
 	});
 
