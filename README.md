@@ -5,13 +5,16 @@
     Upload files and text to an Up1 based pastebin. If no argument is specified, stdin is assumed.
     
     Options:
-      -b, --binary        force application/octet-stream (for downloadable file)
-      -t, --text          force text/plain (for pastebin)
-      -f, --file <name>   force file name for stdin based inputs
-      -m, --mime <mime>   force given mime type (default: detect)
-          --version       display version information and exit
-          --help          display this help and exit
-    
+      -b, --binary                             force application/octet-stream (for downloadable file)
+      -t, --text                               force text/plain (for pastebin)
+      -f, --file <name>                        force file name for stdin based inputs
+      -m, --mime <mime>                        force given mime type (default: detect)
+      -s, --server <https://example.com:443>   specify Up1 server (default: https://up1.ca)
+      -k, --apikey <key>                       specify server api key (default: c61540b5ceecd05092799f936e27755f)
+          --version                            display version information and exit
+          --help                               display this help and exit
+
+
 ### Usage examples
 
 Paste command output to Up1:

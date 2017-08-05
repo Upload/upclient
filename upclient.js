@@ -2,6 +2,7 @@
 "use strict";
 var sjcl = require('./sjcl.js');
 var https = require('https');
+var http = require('http');
 var crypto = require('crypto');
 var FormData = require('form-data');
 var mmm = require('mmmagic');
@@ -11,6 +12,10 @@ var cli = require('snack-cli');
 var path = require('path');
 var S = require('string');
 S.extendPrototype();
+const { URL } = require('url');
+
+const up1_server_default = "https://up1.ca";
+const up1_apikey_default = "c61540b5ceecd05092799f936e27755f";
 
 var argv = cli
 	.name('up')
@@ -21,7 +26,11 @@ var argv = cli
 	.option('-t, --text', 'force text/plain', false)
 	.option('-f, --file <name>', 'force file name for stdin based inputs', false)
 	.option('-m, --mime <mime>', 'force given mime type', 'detect')
+	.option('-s, --server <https://example.com:443>', 'specify Up1 server', (process.env.UP1_SERVER || up1_server_default) )
+	.option('-k, --apikey <key>', 'specify server api key', (process.env.UP1_APIKEY || up1_apikey_default) )
 	.parse();
+
+const uphost = new URL(argv.server);
 
 function parametersfrombits(seed) {
     var out = sjcl.hash.sha512.hash(seed)
@@ -124,22 +133,33 @@ function doUpload(data, name, type) {
 
 
 	var formdata = new FormData()
-	formdata.append('api_key', 'c61540b5ceecd05092799f936e27755f')
+	formdata.append('api_key', argv.apikey)
 	formdata.append('ident', result.ident)
 	formdata.append('file', result.encrypted, {filename: 'file', contentType: 'text/plain'})
 
-	var req = https.request({
-	    host: 'up1.ca',
-	    port: 443,
-	    path: '/up',
-	    method: 'POST',
-	    headers: formdata.getHeaders()
-	});
+    if ( uphost.protocol === "https:" ) {
+        var req = https.request({
+            host: uphost.hostname,
+            port: uphost.port,
+            path: '/up',
+            method: 'POST',
+            headers: formdata.getHeaders()
+        });
+    } else if ( uphost.protocol === "http:" ) {
+        var req = http.request({
+            host: uphost.hostname,
+            port: uphost.port,
+            path: '/up',
+            method: 'POST',
+            headers: formdata.getHeaders()
+        });
+    }
 
 
 	formdata.pipe(req);
 
-	req.on('error', function(err) {
+	req.on('error', (err) => {
+        console.error(err);
 	});
 
 	req.on('response', function(res) {
@@ -149,7 +169,7 @@ function doUpload(data, name, type) {
 		data_out += chunk;
 	    });
 	    res.on('end', function() {
-		var res_url = "https://up1.ca/#"+result.seed;
+		var res_url = uphost.origin+"/#"+result.seed;
 		console.log(res_url);
 	    });
 	});
