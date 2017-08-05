@@ -34,6 +34,24 @@ Do the same as above, but also notify when complete:
 
     import png:- | up | tee >(xsel -b) >(xargs notify-send "Upload Complete")
 
+### Environment Variables
+
+Some options can also be configured via environment variables. Command line options take precedence over environment variables.
+
+    UP1_SERVER: equivalent to --server
+    UP1_APIKEY: equivalent to --apikey
+    UP1_DELURL: equivalent to --delurl when set to "1"
+
+For example, the following in a bash shell:
+
+    export UP1_SERVER="https://example.com"
+    export UP1_DELURL=1
+    echo foo bar | up
+
+is equivalent to:
+
+    echo foo bar | up -s "https://example.com" -d
+
 ### Up1
 
 For more information on Up1, view the README at https://github.com/Upload/Up1
